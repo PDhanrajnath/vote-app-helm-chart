@@ -1,1 +1,10 @@
-#!jenkins
+pipeline {
+  agent any
+  stages {
+    stage('Run Helm') {
+      steps {
+        sh 'helm install voteapp . '
+      }
+}
+}
+}
