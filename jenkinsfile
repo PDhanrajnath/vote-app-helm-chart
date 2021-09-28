@@ -1,10 +1,48 @@
-pipeline {
-  agent any
-  stages {
-    stage('Run Helm') {
-      steps {
-        sh 'helm install voteapp . '
-      }
-}
-}
-}
+def repo="https://github.com/PDhanrajnath/vote-app-helm-chart/"
+pipeline{
+		agent{
+			
+			kubernetes {
+			    
+			    yaml '''
+        apiVersion: v1
+        kind: Pod
+        spec:
+          containers:
+          - name: helm
+            image: alpine/helm
+            command:
+            - cat
+            tty: true
+        '''
+    
+    }
+		}
+    environment {
+        MY_KUBECONFIG = credentials('config-file')
+    }
+		stages{
+				
+                stage("add Repo") {
+                        steps {
+                            container('helm'){
+                               sh "helm repo add  myvoteapp https://pdhanrajnath.github.io/vote-app-helm-chart/"
+                            }
+                            
+                        }
+                    }
+                    
+                stage("Build") {
+                        steps {
+                            container('helm'){
+                               sh "helm install voting myvoteapp --kubeconfig=$MY_KUBECONFIG"
+                            }
+                            
+                        }
+                    }
+                    
+                    
+				
+                
+            }
+        }
